@@ -12,6 +12,9 @@ use Gemini\Data\Content;
 use Gemini\Data\GenerationConfig;
 use Gemini\Data\SafetySetting;
 use Gemini\Enums\ModelType;
+use Gemini\Exceptions\ErrorException;
+use Gemini\Exceptions\TransporterException;
+use Gemini\Exceptions\UnserializableResponse;
 use Gemini\Requests\GenerativeModel\CountTokensRequest;
 use Gemini\Requests\GenerativeModel\GenerateContentRequest;
 use Gemini\Requests\GenerativeModel\StreamGenerateContentRequest;
@@ -19,6 +22,7 @@ use Gemini\Responses\GenerativeModel\CountTokensResponse;
 use Gemini\Responses\GenerativeModel\GenerateContentResponse;
 use Gemini\Responses\StreamResponse;
 use Gemini\Transporters\DTOs\ResponseDTO;
+use JsonException;
 
 final class GenerativeModel implements GenerativeModelContract
 {
@@ -34,6 +38,7 @@ final class GenerativeModel implements GenerativeModelContract
         ModelType|string $model,
         public array $safetySettings = [],
         public ?GenerationConfig $generationConfig = null,
+        public Content|string|null $systemInstruction = null,
     ) {
         $this->model = $this->parseModel(model: $model);
     }
@@ -52,14 +57,25 @@ final class GenerativeModel implements GenerativeModelContract
         return $this;
     }
 
+    public function withSystemInstruction(Content|string $systemInstruction): self
+    {
+        $this->systemInstruction = $systemInstruction;
+
+        return $this;
+    }
+
     /**
      * Runs a model's tokenizer on input content and returns the token count.
      *
      * @see https://ai.google.dev/api/rest/v1/models/countTokens
      *
-     * @param  string|Blob|array<string|Blob>|Content  ...$parts
+     * @param string|Blob|array|Content ...$parts
      *
-     * @throws \Exception
+     * @return CountTokensResponse
+     * @throws ErrorException
+     * @throws TransporterException
+     * @throws UnserializableResponse
+     * @throws JsonException
      */
     public function countTokens(string|Blob|array|Content ...$parts): CountTokensResponse
     {
@@ -83,6 +99,7 @@ final class GenerativeModel implements GenerativeModelContract
                 parts: $parts,
                 safetySettings: $this->safetySettings,
                 generationConfig: $this->generationConfig,
+                systemInstruction: $this->systemInstruction,
             )
         );
 
