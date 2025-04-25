@@ -39,6 +39,7 @@ final class GenerationConfig implements Arrayable
             'temperature' => $this->temperature,
             'topP' => $this->topP,
             'topK' => $this->topK,
+            'responseMimeType' => 'application/json',
         ];
     }
 }

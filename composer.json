@@ -1,5 +1,6 @@
 {
-  "name": "google-gemini-php/client",
+  "name": "pkotets/google-gemini-client-php",
+  "version": "1.0.0",
   "description": "Gemini API is a supercharged PHP API client that allows you to interact with the Gemini API",
   "license": "MIT",
   "keywords": [
